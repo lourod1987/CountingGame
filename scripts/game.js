@@ -13,6 +13,9 @@ class NumberedBox extends createjs.Container {
         //add in instance of NumberBox / enable ability to edit num text / add to stage
         const movieclip = new lib.NumberedBox();
         movieclip.numberText.text = number;
+
+        new createjs.ButtonHelper(movieclip, 0, 1, 2, false, new lib.RestartButton(), 3);
+
         this.addChild(movieclip);
 
         this.setBounds(0, 0, 50, 50);
@@ -59,7 +62,9 @@ class Game {
         this.stage = new createjs.Stage(this.canvas);
 
         this.stage.width = this.canvas.width;  
-        this.stage.height = this.canvas.height;  
+        this.stage.height = this.canvas.height;
+
+        this.stage.enableMouseOver();
 
         window.debugStage = this.stage;
 
@@ -71,21 +76,30 @@ class Game {
 
         createjs.Ticker.setFPS(60);
 
+        this.restartGame();
+
         //game related initialize
         this.gameData = new GameData();
 
         //redraw stage at 60fps
         createjs.Ticker.on("tick", this.stage);
 
+        
+    }
+
+    version() {
+        return '1.0.0';
+    }
+
+    restartGame() {
+        this.gameData.resetData();
+        this.stage.removeAllChildren();
+
         //background
         this.stage.addChild(new lib.Background());
 
         //add instances of numbered box to the stage
         this.generateMultiBoxes(this.gameData.amountOfBox);
-    }
-
-    version() {
-        return '1.0.0';
     }
 
     //method to create a certain number of boxes based on amount var
@@ -104,12 +118,17 @@ class Game {
         if (this.gameData.isCorrectNum(numberedBox.number)) {
             this.removeChild(numberedBox);
             this.gameData.nextNumber();
-        }
         
-        //game over
-        if (this.gameData.gameWin()) {
-            const gameOverScreen = new lib.GameOverView();
-            this.stage.addChild(gameOverScreen);
+        
+            //game over
+            if (this.gameData.gameWin()) {
+                const gameOverScreen = new lib.GameOverView();
+                this.stage.addChild(gameOverScreen);
+
+                gameOverScreen.restartGame.on('click', (function() {
+                    this.restartGame();
+                }).bind(this));
+            }
         }
     }
 
