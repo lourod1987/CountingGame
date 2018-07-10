@@ -14,6 +14,13 @@ class NumberedBox extends createjs.Container {
         const movieclip = new lib.NumberedBox();
         movieclip.numberText.text = number;
 
+        movieclip.numberText.font = "24px Coda Caption";
+        //firefox fix, must manually set y value below
+        // movieclip.numberText.textBaseline = "alphabet";
+        // movieclip.numberText.x += 2;
+        // movieclip.numberText.y = 0;
+
+
         new createjs.ButtonHelper(movieclip, 0, 1, 2, false, new lib.RestartButton(), 3);
 
         this.addChild(movieclip);
@@ -26,6 +33,7 @@ class NumberedBox extends createjs.Container {
 
     handleClick() {
         this.game.handleClick(this);
+        createjs.Sound.play("filetitlehere");
     }
 }
 
@@ -57,6 +65,8 @@ class GameData {
 class Game {
     constructor() {
         console.log(`Welcome to the game. Version ${this.version()}`);
+
+        this.loadSound();
 
         this.canvas = document.getElementById("game-canvas");
         this.stage = new createjs.Stage(this.canvas);
@@ -91,8 +101,14 @@ class Game {
         return '1.0.0';
     }
 
+    loadSound() {
+        createjs.Sound.registerSound("soundfx/filenamehere", "filetitlehere");
+        createjs.Sound.registerSound("soundfx/filenamehere", "filetitlehere");
+        createjs.Sound.alternateExtensions = ["ogg", "wave"];
+    }
+
     restartGame() {
-        this.gameData.resetData();
+        // this.gameData.resetData();
         this.stage.removeAllChildren();
 
         //background
@@ -122,10 +138,13 @@ class Game {
         
             //game over
             if (this.gameData.gameWin()) {
+                createjs.Sound.play("filetitlehere");
+
                 const gameOverScreen = new lib.GameOverView();
                 this.stage.addChild(gameOverScreen);
 
                 gameOverScreen.restartGame.on('click', (function() {
+                    createjs.Sound.play("filetitlehere");
                     this.restartGame();
                 }).bind(this));
             }
